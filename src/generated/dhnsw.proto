@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package dhnsw;
+
+service DhnswService {
+  rpc GetMetaHnsw(Empty) returns (MetaHnswResponse);
+  rpc GetOffset_Para(Empty) returns (Offset_ParaResponse);
+  rpc GetMapping(Empty) returns (MappingResponse);
+  rpc GetOffset_SubHnsw(Empty) returns (Offset_SubHnswResponse);
+  rpc GetOverflow(Empty) returns (OverflowResponse);
+
+  // Reconstruction RPCs (master node triggers, clients poll status)
+  rpc TriggerReconstruction(TriggerReconstructionRequest) returns (TriggerReconstructionResponse);
+  rpc GetReconstructionStatus(Empty) returns (ReconstructionStatusResponse);
+  rpc AcknowledgeReconstruction(AckReconstructionRequest) returns (AckReconstructionResponse);
+
+  // Epoch-based coordination
+  rpc GetEpochInfo(Empty) returns (EpochInfoResponse);
+  rpc GetInsertCache(GetInsertCacheRequest) returns (InsertCacheResponse);
+
+  // Safe epoch-based RDMA reads (acquire/release read references)
+  rpc AcquireEpochRead(AcquireEpochRequest) returns (AcquireEpochResponse);
+  rpc ReleaseEpochRead(ReleaseEpochRequest) returns (ReleaseEpochResponse);
+}
+
+message Empty {}
+
+message MetaHnswResponse {
+  bytes serialized_meta_hnsw = 1;
+}
+
+message Offset_ParaResponse {
+  repeated uint64 offsets_para = 1;
+}
+
+message MappingResponse {
+  repeated MappingEntry entries = 1;
+}
+
+message MappingEntry {
+  uint32 sub_index = 1;
+  repeated int64 mapping = 2;
+}
+
+message OverflowResponse {
+  repeated uint64 overflow = 1;
+}
+
+message Offset_SubHnswResponse {
+  repeated uint64 offsets_subhnsw = 1;
+}
+
+// Reconstruction messages
+message TriggerReconstructionRequest {
+  string client_id = 1;
+  repeated float buffered_vectors = 2;  // Vectors buffered during overflow
+  int32 vector_count = 3;
+  int32 dimension = 4;
+  string overflow_type = 5;  // Which component overflowed (levels, offsets, neighbors, xb)
+  int32 overflow_sub_idx = 6;  // Which sub-index overflowed
+}
+
+message TriggerReconstructionResponse {
+  bool success = 1;
+  string message = 2;
+  uint64 reconstruction_id = 3;
+  uint64 new_epoch = 4;
+}
+
+message ReconstructionStatusResponse {
+  enum Status {
+    IDLE = 0;
+    IN_PROGRESS = 1;
+    COMPLETED = 2;
+    FAILED = 3;
+  }
+  Status status = 1;
+  uint64 reconstruction_id = 2;
+  double progress_percent = 3;
+  string message = 4;
+  uint64 epoch = 5;
+  uint64 rdma_offset = 6;
+  int32 phase = 7;
+  double progress = 8;
+}
+
+message AckReconstructionRequest {
+  string client_id = 1;
+  uint64 reconstruction_id = 2;
+  uint64 epoch = 3;
+}
+
+message AckReconstructionResponse {
+  bool success = 1;
+  int32 remaining_clients = 2;
+  bool all_acknowledged = 3;
+}
+
+// Epoch-based coordination messages
+message EpochInfoResponse {
+  uint64 epoch = 1;
+  uint64 rdma_offset = 2;
+  uint64 reconstruction_id = 3;
+  bool reconstruction_in_progress = 4;
+}
+
+message GetInsertCacheRequest {
+  string client_id = 1;
+  uint64 epoch = 2;
+}
+
+message InsertCacheResponse {
+  uint64 epoch = 1;
+  repeated float vectors = 2;
+  repeated int64 ids = 3;
+  int32 vector_count = 4;
+  int32 dimension = 5;
+  bool has_cache = 6;
+}
+
+// Epoch-based RDMA read coordination messages
+// Clients acquire a read reference before RDMA reads, and release after
+// This ensures the server doesn't overwrite buffers while clients read
+message AcquireEpochRequest {
+  string client_id = 1;
+}
+
+message AcquireEpochResponse {
+  bool success = 1;
+  uint64 epoch = 2;
+  uint64 rdma_base_offset = 3;  // Base offset for this epoch's data in RDMA buffer
+  bool has_metadata = 4;
+  // Inline metadata for the epoch (avoids separate RPC calls - atomically consistent)
+  repeated uint64 offset_subhnsw = 5;
+  repeated uint64 offset_para = 6;
+  repeated uint64 overflow = 7;
+  bytes serialized_meta_hnsw = 8;  // Full meta HNSW for this epoch
+  repeated MappingEntry mapping = 9;  // Mapping for this epoch
+}
+
+message ReleaseEpochRequest {
+  string client_id = 1;
+  uint64 epoch = 2;
+}
+
+message ReleaseEpochResponse {
+  bool success = 1;
+}

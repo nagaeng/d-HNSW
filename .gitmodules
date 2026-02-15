@@ -1,0 +1,9 @@
+[submodule "deps/METIS"]
+	path = deps/METIS
+	url = https://github.com/KarypisLab/METIS.git
+[submodule "deps/GKlib"]
+	path = deps/GKlib
+	url = https://github.com/KarypisLab/GKlib.git
+[submodule "deps/gflags"]
+	path = deps/gflags
+	url = https://github.com/gflags/gflags.git

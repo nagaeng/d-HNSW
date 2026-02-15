@@ -1,0 +1,182 @@
+// https://echarts.apache.org/examples/en/editor.html?c=line-stack
+option = {
+    title: {
+      text: '1M SIFT@1',
+      textStyle: {
+        fontSize: 22,  // Increase the font size of the title
+        fontWeight: 'normal'
+      }
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['num_sub_hnsw = 20', 'num_sub_hnsw = 40', 'num_sub_hnsw = 60', 'num_sub_hnsw = 80', 'num_sub_hnsw = 100'],
+      textStyle: {
+        fontSize: 14  // Increase the font size of the legend
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '17%',
+      bottom: '2%',
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'value',
+      name: 'Query time, microsecond',
+      nameTextStyle: {
+        fontSize: 20  // Increase the font size of the xAxis name
+      },
+      axisLabel: {
+        fontSize: 20  // Increase the font size of the xAxis labels
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Recall',
+      nameTextStyle: {
+        fontSize: 20  // Increase the font size of the xAxis name
+      },
+      axisLabel: {
+        fontSize: 20  // Increase the font size of the xAxis labels
+      }
+    },
+    series: [
+      {
+        name: 'num_sub_hnsw = 20',
+        type: 'line',
+        data: [
+          [436, 0.1322],
+          [571, 0.3275],
+          [714, 0.594],
+          [1129, 0.8012],
+          [1703, 0.9142],
+          [2257, 0.9424],
+          [2819, 0.9535],
+          [3488, 0.9577],
+          [4373, 0.9604],
+          [5433, 0.962],
+          [5037, 0.9632],
+          [5540, 0.964],
+          [6032, 0.9641],
+          [6599, 0.9646],
+          [8458, 0.9651],
+          [8424, 0.9652],
+          [8152, 0.9655],
+          [9944, 0.9657],
+          [9358, 0.9657],
+        ],
+        smooth: false
+      },
+      {
+        name: 'num_sub_hnsw = 40',
+        type: 'line',
+        data: [
+          [540, 0.1388],
+          [663, 0.3416],
+          [955, 0.606],
+          [1355, 0.8042],
+          [2019, 0.9026],
+          [2724, 0.9244],
+          [3352, 0.9331],
+          [3926, 0.936],
+          [4473, 0.9386],
+          [5128, 0.9393],
+          [5654, 0.9402],
+          [6415, 0.9405],
+          [6774, 0.9408],
+          [8763, 0.9412],
+          [8215, 0.9412],
+          [8509, 0.9414],
+          [9148, 0.9417],
+          [9838, 0.9416],
+          [10302, 0.9418],
+        ],
+        smooth: false
+      },
+        {
+        name: 'num_sub_hnsw = 60',
+        type: 'line',
+        data: [
+          [556, 0.1332],
+          [725, 0.3383],
+          [995, 0.6117],
+          [1413, 0.801],
+          [2142, 0.9016],
+          [2818, 0.9218],
+          [3540, 0.9287],
+          [4123, 0.9316],
+          [6269, 0.9327],
+          [5275, 0.9336],
+          [5867, 0.934],
+          [6418, 0.9344],
+          [7036, 0.9349],
+          [7623, 0.9352],
+          [8270, 0.9353],
+          [8721, 0.9354],
+          [10791, 0.9355],
+          [9989, 0.9357],
+          [10504, 0.9358],
+        ],
+        smooth: false
+      },
+      {
+        name: 'num_sub_hnsw = 80',
+        type: 'line',
+        data: [
+          [548, 0.134],
+          [772, 0.347],
+          [987, 0.6163],
+          [1432, 0.8023],
+          [2726, 0.8936],
+          [4267, 0.9132],
+          [4568, 0.919],
+          [4333, 0.9206],
+          [6583, 0.9216],
+          [5502, 0.9221],
+          [6076, 0.9223],
+          [6639, 0.9225],
+          [7277, 0.9226],
+          [7729, 0.9227],
+          [8429, 0.9229],
+          [8963, 0.9228],
+          [11180, 0.923],
+          [10199, 0.923],
+          [10761, 0.9232],
+        ],
+        smooth: false
+      },
+      {
+        name: 'num_sub_hnsw = 100',
+        type: 'line',
+        data: [
+          [611, 0.1247],
+          [705, 0.3394],
+          [1043, 0.6228],
+          [1441, 0.8029],
+          [2304, 0.8919],
+          [3019, 0.9108],
+          [3716, 0.9169],
+          [4446, 0.9187],
+          [5001, 0.9196],
+          [5632, 0.9202],
+          [6147, 0.9207],
+          [6794, 0.9214],
+          [7391, 0.9217],
+          [9631, 0.9217],
+          [8464, 0.9219],
+          [9064, 0.9219],
+          [9602, 0.922],
+          [10204, 0.9221],
+          [11008, 0.9221],
+        ],
+        smooth: false
+      },
+    ]
+  };

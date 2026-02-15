@@ -1,0 +1,14 @@
+datasets/
+build/
+out/
+.vscode/
+.cache/
+install/
+# Logs and results
+*.log
+*.csv
+*.png
+*.tar.gz
+
+# OS
+.DS_Store

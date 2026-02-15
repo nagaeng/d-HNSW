@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package dhnsw;
+
+// Reconstruction coordination service for distributed HNSW
+service ReconstructionService {
+  // Master node triggers reconstruction when overflow is full
+  rpc TriggerReconstruction(ReconstructionRequest) returns (ReconstructionResponse);
+  
+  // Server notifies clients when reconstruction is complete
+  rpc RegisterClient(ClientRegistration) returns (RegistrationResponse);
+  
+  // Clients poll for reconstruction status or receive push notification
+  rpc GetReconstructionStatus(Empty) returns (ReconstructionStatus);
+  
+  // Get the updated index data after reconstruction
+  rpc GetUpdatedIndex(Empty) returns (UpdatedIndexResponse);
+  
+  // Synchronize insert cache across computing nodes
+  rpc SyncInsertCache(InsertCacheData) returns (SyncResponse);
+  
+  // Get insert cache from master node
+  rpc GetInsertCache(Empty) returns (InsertCacheData);
+  
+  // Acknowledge reconstruction completion
+  rpc AckReconstruction(AckRequest) returns (AckResponse);
+  
+  // Stream throughput data for monitoring
+  rpc StreamThroughput(ThroughputRequest) returns (stream ThroughputData);
+}
+
+message Empty {}
+
+message ReconstructionRequest {
+  string client_id = 1;
+  repeated float buffered_vectors = 2;  // Vectors to include in reconstruction
+  int32 vector_count = 3;
+  int32 dimension = 4;
+}
+
+message ReconstructionResponse {
+  bool accepted = 1;
+  string message = 2;
+  uint64 reconstruction_id = 3;
+}
+
+message ClientRegistration {
+  string client_id = 1;
+  string client_address = 2;
+  bool is_master = 3;  // True for insert client, false for query clients
+}
+
+message RegistrationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReconstructionStatus {
+  enum Status {
+    IDLE = 0;
+    IN_PROGRESS = 1;
+    COMPLETED = 2;
+    FAILED = 3;
+  }
+  Status status = 1;
+  uint64 reconstruction_id = 2;
+  double progress_percent = 3;
+  string message = 4;
+  uint64 new_rdma_base_offset = 5;  // New RDMA memory region offset after reconstruction
+}
+
+message UpdatedIndexResponse {
+  bytes serialized_meta_hnsw = 1;
+  repeated uint64 offset_subhnsw = 2;
+  repeated uint64 offset_para = 3;
+  repeated uint64 overflow = 4;
+  repeated MappingEntryNew mapping_entries = 5;
+  uint64 rdma_base_offset = 6;
+}
+
+message MappingEntryNew {
+  uint32 sub_index = 1;
+  repeated int64 mapping = 2;
+}
+
+// LSH-based insert cache for buffering during reconstruction
+message InsertCacheData {
+  repeated float vectors = 1;
+  repeated int64 original_indices = 2;  // Original vector indices
+  int32 vector_count = 3;
+  int32 dimension = 4;
+  repeated uint64 lsh_bucket_ids = 5;   // LSH bucket assignments
+  uint64 cache_version = 6;
+}
+
+message SyncResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message AckRequest {
+  string client_id = 1;
+  uint64 reconstruction_id = 2;
+}
+
+message AckResponse {
+  bool all_acknowledged = 1;
+  int32 remaining_clients = 2;
+}
+
+// Throughput monitoring
+message ThroughputRequest {
+  string client_id = 1;
+  int32 interval_ms = 2;  // Reporting interval in milliseconds
+}
+
+message ThroughputData {
+  uint64 timestamp_ms = 1;
+  double queries_per_second = 2;
+  double inserts_per_second = 3;
+  double total_ops_per_second = 4;
+  bool is_blocked = 5;  // True if queries are blocked during reconstruction
+  string client_id = 6;
+}
+
