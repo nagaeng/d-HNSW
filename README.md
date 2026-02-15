@@ -92,7 +92,7 @@ sudo ifconfig <ib_interface> 192.168.1.10 netmask 255.255.0.0
 # Compute node 2 (e.g., 192.168.1.11)
 sudo ifconfig <ib_interface> 192.168.1.11 netmask 255.255.0.0
 
-# Compute node 2 (e.g., 192.168.1.11)
+# Compute node 3 (e.g., 192.168.1.11)
 sudo ifconfig <ib_interface> 192.168.1.12 netmask 255.255.0.0
 ```
 
@@ -151,7 +151,7 @@ cd build
 ./run_client \
     --server_address=10.0.0.1:50051 \
     --rdma_server_address=192.168.1.2:8888 \
-    --use_nic_idx=0 \
+    --use_nic_idx=3 \
     --dataset=sift1M
 ```
 
