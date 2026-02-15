@@ -1,4 +1,4 @@
-# DHNSW: Efficient Vector Search on Disaggregated Memory
+# d-HNSW: Efficient Vector Search on Disaggregated Memory
 
 The first vector search engine
 for RDMA-based disaggregated memory systems. 
@@ -7,7 +7,7 @@ for RDMA-based disaggregated memory systems.
 ## Project Structure
 
 ```
-dhnsw/
+d-HNSW/
 ├── CMakeLists.txt
 ├── README.md
 ├── src/
@@ -38,8 +38,8 @@ dhnsw/
 Install Mellanox OFED, build tools, and configure huge pages (run on **every** node):
 
 ```bash
-git clone --recursive https://github.com/fffeifang/dhnsw.git
-cd dhnsw
+git clone --recursive https://github.com/fffeifang/d-HNSW.git
+cd d-HNSW
 
 # Skip disk mount (if already set up):
 sudo ./scripts/setup.sh
@@ -115,7 +115,7 @@ Check the device name with `ibstat` (e.g., `mlx4_0`, `mlx5_0`, `mlx5_2`).
 
 ### Find Your NIC Index
 
-DHNSW needs the NIC index (`--use_nic_idx`) to create RDMA queue pairs.
+d-HNSW needs the NIC index (`--use_nic_idx`) to create RDMA queue pairs.
 
 Use the NIC index corresponding to your machine configuration. For example:
 
