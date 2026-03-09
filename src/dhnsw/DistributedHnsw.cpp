@@ -379,7 +379,7 @@ void DistributedHnsw::build(const std::vector<float>& data_vec, size_t /*unused*
     }
     // print the size of each sub_hnsw
     for (int i = 0; i < num_sub_hnsw; i++) {
-        printf("Sub-hnsw %d has %d elements\n", i, sub_hnsw[i]->ntotal);
+        printf("Sub-hnsw %d has %ld elements\n", i, sub_hnsw[i]->ntotal);
     }
 }
 
