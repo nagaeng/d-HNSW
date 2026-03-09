@@ -32,7 +32,8 @@
 
 
 #include <memory>  
-# define IDXTYPEWIDTH 64 
+# define IDXTYPEWIDTH 64
+# define REALTYPEWIDTH 32
 extern "C" {
   #include <metis.h>
 }

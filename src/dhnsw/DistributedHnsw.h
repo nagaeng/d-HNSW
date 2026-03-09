@@ -451,9 +451,9 @@ private:
 class DhnswServiceImpl final : public DhnswService::Service {
 public:
     DhnswServiceImpl(const std::vector<uint8_t>& serialized_meta_hnsw,
-                     const std::vector<size_t>& offset_sub_hnsw,
-                     const std::vector<size_t>& offset_para,
-                     const std::vector<size_t>& overflow,
+                     const std::vector<uint64_t>& offset_sub_hnsw,
+                     const std::vector<uint64_t>& offset_para,
+                     const std::vector<uint64_t>& overflow,
                      const std::vector<std::vector<dhnsw_idx_t>>& mapping)
         : serialized_meta_hnsw_(serialized_meta_hnsw), offset_sub_hnsw_(offset_sub_hnsw), offset_para_(offset_para), overflow_(overflow), mapping_(mapping) {}
 
@@ -466,7 +466,7 @@ public:
 
     Status GetOffset_SubHnsw(ServerContext* context, const Empty* request,
                      Offset_SubHnswResponse* response) override {
-        for (size_t off : offset_sub_hnsw_) {
+        for (auto off : offset_sub_hnsw_) {
             response->add_offsets_subhnsw(off);
         }
         return Status::OK;
@@ -474,7 +474,7 @@ public:
 
     Status GetOffset_Para(ServerContext* context, const Empty* request,
                      Offset_ParaResponse* response) override {
-        for (size_t off : offset_para_) {
+        for (auto off : offset_para_) {
             response->add_offsets_para(off);
         }
         return Status::OK;
@@ -494,7 +494,7 @@ public:
 
     Status GetOverflow(ServerContext* context, const Empty* request,
                      OverflowResponse* response) override {
-        for (size_t off : overflow_) {
+        for (auto off : overflow_) {
             response->add_overflow(off);
         }
         return Status::OK;
@@ -511,15 +511,15 @@ public:
         response->set_has_metadata(true);
 
         // Inline offset_subhnsw
-        for (size_t off : offset_sub_hnsw_) {
+        for (auto off : offset_sub_hnsw_) {
             response->add_offset_subhnsw(off);
         }
         // Inline offset_para
-        for (size_t off : offset_para_) {
+        for (auto off : offset_para_) {
             response->add_offset_para(off);
         }
         // Inline overflow
-        for (size_t off : overflow_) {
+        for (auto off : overflow_) {
             response->add_overflow(off);
         }
         // Inline serialized meta_hnsw
@@ -571,9 +571,9 @@ public:
 
 private:
     std::vector<uint8_t> serialized_meta_hnsw_;
-    std::vector<size_t> offset_sub_hnsw_;
-    std::vector<size_t> offset_para_;
-    std::vector<size_t> overflow_;
+    std::vector<uint64_t> offset_sub_hnsw_;
+    std::vector<uint64_t> offset_para_;
+    std::vector<uint64_t> overflow_;
     std::vector<std::vector<dhnsw_idx_t>> mapping_;
     std::vector<int> part_;
     // std::vector<uint8_t> subhnsw_data_;
