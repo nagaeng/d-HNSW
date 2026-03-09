@@ -31,7 +31,7 @@ public:
   const Option<RAddress> addr;
   const Option<u64> lid;
 
-  static Option<Arc<RNic>> create(const DevIdx &idx, u8 gid = 0) {
+  static Option<Arc<RNic>> create(const DevIdx &idx, u8 gid = 3) {
     auto res = std::make_shared<RNic>(idx,gid);
     if (res->valid()) {
       return res;
@@ -44,7 +44,7 @@ public:
     if success, valid() should return true.
     Otherwise, should print the error to the screen, or panic.
    */
-  RNic(const DevIdx &idx, u8 gid = 0)
+  RNic(const DevIdx &idx, u8 gid = 3)
       : id(idx), ctx(open_device(idx)), pd(alloc_pd()), lid(fetch_lid(idx)),
         addr(query_addr(gid)) {
     //
@@ -138,7 +138,7 @@ private:
     }
   }
 
-  Option<RAddress> query_addr(u8 gid_index = 0) const {
+  Option<RAddress> query_addr(u8 gid_index = 3) const {
 
     if (!valid())
       return {};

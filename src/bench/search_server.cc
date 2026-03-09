@@ -16,7 +16,7 @@
 
 DEFINE_int32(port, 50051, "Port for the gRPC server to listen on.");
 DEFINE_int32(rdma_port, 8888, "Port for the RDMA control channel.");
-DEFINE_int32(use_nic_idx, 0, "Which NIC to create QP");
+DEFINE_int32(use_nic_idx, 3, "Which NIC to create QP");
 DEFINE_int32(reg_nic_name, 73, "The name to register an opened NIC at rctrl.");
 DEFINE_int32(reg_mem_name, 73, "The name to register an MR at rctrl.");
 DEFINE_string(dataset_path, "../datasets/sift/sift_base.fvecs", "Path to the dataset.");
@@ -44,9 +44,9 @@ using namespace rdmaio::qp;
 
 void RunGrpcServer(const std::string& server_address,
                    const std::vector<uint8_t>& serialized_meta_hnsw,
-                   const std::vector<size_t>& offset_sub_hnsw,
-                   const std::vector<size_t>& offset_para,
-                   const std::vector<size_t>& overflow,
+                   const std::vector<uint64_t>& offset_sub_hnsw,
+                   const std::vector<uint64_t>& offset_para,
+                   const std::vector<uint64_t>& overflow,
                    const std::vector<std::vector<dhnsw_idx_t>>& mapping) {
     DhnswServiceImpl service(serialized_meta_hnsw, offset_sub_hnsw, offset_para, overflow, mapping);
 
@@ -134,9 +134,9 @@ int main(int argc, char** argv) {
     std::cout << "Size of meta_hnsw: " << dhnsw.get_meta_hnsw_size() << " MB" << std::endl;
     std::cout << "Thread " << std::max((size_t)10 * 10 * 1000 * 1000 / (dhnsw.sub_hnsw[0]->hnsw.max_level * dim * dhnsw.sub_hnsw[0]->hnsw.efSearch + 1), (size_t)1) << std::endl;
     // Serialize the meta_hnsw and offset
-    std::vector<size_t> offset_sub_hnsw;
-    std::vector<size_t> offset_para;
-    std::vector<size_t> overflow;
+    std::vector<uint64_t> offset_sub_hnsw;
+    std::vector<uint64_t> offset_para;
+    std::vector<uint64_t> overflow;
     std::vector<uint8_t> serialized_data = dhnsw.serialize_with_record_with_in_out_gap(offset_sub_hnsw, offset_para, overflow);
     std::cout << "Serialized data size: " << serialized_data.size() << " MB" << std::endl;
     std::vector<uint8_t> serialized_meta_hnsw = dhnsw.serialize_meta_hnsw();

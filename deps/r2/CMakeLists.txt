@@ -20,8 +20,8 @@ target_link_libraries(r2 boost_context boost_system boost_coroutine boost_thread
 #include(tests/tests.cmake)
 
 
-## benchs
-include(benchs/bench.cmake)
+## benchs (disabled: requires jemalloc which is not part of the main project)
+#include(benchs/bench.cmake)
 
 #[[
 enable_testing()
