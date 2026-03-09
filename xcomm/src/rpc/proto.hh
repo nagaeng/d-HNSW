@@ -45,6 +45,7 @@ struct __attribute__((packed)) Header {
   friend std::ostream &operator<<(std::ostream &os, const Header &h) {
     os << "type:" << h.type << "; rpc_id: " << h.rpc_id << "; payload:"  << h.payload
        << " cor_id: " << h.cor_id;
+    return os;
   }
 } __attribute__((aligned(sizeof(u64))));
 
