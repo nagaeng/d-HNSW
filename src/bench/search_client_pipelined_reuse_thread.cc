@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
         RDMA_LOG(4) << "Thread " << i << " RDMA resources initialized";
     }
     for (int i = 0; i < num_threads; ++i) {
-         thread_params[i].core_start = nth_phys_core(i * omp_threads_per_worker);
+         thread_params[i].core_start = nth_phys_core_on_numa1(i * omp_threads_per_worker);
         if (thread_params[i].core_start >= total_cpus) {
             std::cerr << "[WARN] ..." << std::endl;
             thread_params[i].core_start = total_cpus - 1;
