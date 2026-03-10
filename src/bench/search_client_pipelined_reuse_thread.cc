@@ -16,6 +16,7 @@
 #include <random>
 #include <unordered_set>
 #include <omp.h>
+#include <unistd.h>
 #include "../dhnsw/statics.hh"
 #include "../dhnsw/reporter.hh"
 #include "../dhnsw/DistributedHnsw.h"
@@ -57,7 +58,7 @@ int dim_query_data;
 int n_query_data;
 int dim_ground_truth;
 int nth_phys_core_on_numa1(int n) {
-    return n * 2 + 1;          
+    return n;          
 }
 struct thread_param_t {
     int thread_id;
@@ -86,17 +87,24 @@ struct thread_param_t {
 void* client_worker(void* param);
 
 void bind_thread_to_cores(int thread_id, int core_start, int cores_per_thread, bool physical_cores_only) {
+    int total_cpus = (int)sysconf(_SC_NPROCESSORS_ONLN);
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     for (int i = 0; i < cores_per_thread; i++) {
-        CPU_SET(core_start + i*2, &cpuset);
+        int target_cpu = core_start + i;
+        if (target_cpu < total_cpus) {
+            CPU_SET(target_cpu, &cpuset);
+        } else {
+            std::cerr << "[WARN] ..." << std::endl;
+        }
     }
     
     pthread_t current_thread = pthread_self();
     int rc = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if (rc != 0) {
-        std::cerr << "Error: unable to set thread affinity for thread " << thread_id 
-                  << ", error code: " << rc << std::endl;
+        std::cerr << "[ERROR] thread " << thread_id << " setaffinity failed ..." << std::endl;
+    } else {
+        std::cout << "[INFO] thread " << thread_id << " bound to CPU ..." << std::endl;
     }
 }
 
@@ -156,7 +164,10 @@ int main(int argc, char** argv) {
     ground_truth.resize(n_query_data * dim_ground_truth);
     std::cout << "ground_truth.size(): " << ground_truth.size() << std::endl;
     // Calculate core assignments for physical cores
-    int omp_threads_per_worker = FLAGS_physical_cores_per_thread;
+    int total_cpus = (int)sysconf(_SC_NPROCESSORS_ONLN);
+    int omp_threads_per_worker = std::max(1, total_cpus / num_threads);
+    std::cout << "[INFO] total_cpus=" << total_cpus << " ..." << std::endl;
+    
     if (FLAGS_use_physical_cores_only) {
         std::cout << "Using physical cores only (skipping hyperthreads)" << std::endl;
     } else {
@@ -197,9 +208,10 @@ int main(int argc, char** argv) {
         RDMA_LOG(4) << "Thread " << i << " RDMA resources initialized";
     }
     for (int i = 0; i < num_threads; ++i) {
-        thread_params[i].core_start = nth_phys_core_on_numa1(i*omp_threads_per_worker);
-        if(i >= 4) {
-            thread_params[i].core_start = (i-4)*omp_threads_per_worker*2;
+         thread_params[i].core_start = nth_phys_core(i * omp_threads_per_worker);
+        if (thread_params[i].core_start >= total_cpus) {
+            std::cerr << "[WARN] ..." << std::endl;
+            thread_params[i].core_start = total_cpus - 1;
         }
     }
     // --- Create worker threads ---
