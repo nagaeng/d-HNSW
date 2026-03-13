@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     auto qp = RC::create(nic, QPConfig()).value();
     // Create a UDP socket to communicate with the server's controller
     ConnectManager cm(FLAGS_rdma_server_address);
-    if (cm.wait_ready(1000000, 2) == IOCode::Timeout)
+    if (cm.wait_ready(1000000, 20) == IOCode::Timeout)
         RDMA_ASSERT(false) << "cm connect to server timeout";
 
     // Create the pair QP at server using CM

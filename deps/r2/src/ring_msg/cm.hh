@@ -23,7 +23,7 @@ public:
                                      const Arc<::rdmaio::qp::RC> rc,
                                      const ::rdmaio::nic_id_t &nic_id,
                                      const ::rdmaio::qp::QPConfig &config,
-                                     const double &timeout_usec = 1000000) {
+                                     const double &timeout_usec = 10000000) {
 
     RingReply dummy_reply;
 

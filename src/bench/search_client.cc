@@ -18,6 +18,7 @@
 #include <random>
 #include <unordered_set>
 #include <omp.h>
+#include <unistd.h>
 
 #include "../dhnsw/DistributedHnsw.h"
 #include "../util/read_dataset.h"
@@ -34,6 +35,7 @@ DEFINE_string(ground_truth_path, "../datasets/sift/sift_groundtruth.ivecs", "Pat
 // DEFINE_string(query_data_path, "../datasets/gist/gist_query.fvecs", "Path to the query data.");
 // DEFINE_string(ground_truth_path, "../datasets/gist/gist_groundtruth.ivecs", "Path to the ground truth data.");
 
+DEFINE_string(client_id, "", "Unique client identifier for multi-node experiments (e.g., node21, node22). Auto-generated from PID+timestamp if empty.");
 DEFINE_int32(benchmark_duration, 20, "Duration (in seconds) to run each ef benchmark.");
 DEFINE_int32(physical_cores_per_thread, 9, "Number of physical cores per thread");
 DEFINE_bool(use_physical_cores_only, true, "Whether to use only physical cores (skip hyperthreads)");
@@ -164,9 +166,18 @@ int main(int argc, char** argv) {
     std::vector<pthread_t> threads(num_threads);
     std::vector<thread_param_t> thread_params(num_threads);
     
+    // --- Generate unique client ID for multi-node QP naming ---
+    std::string unique_id = FLAGS_client_id;
+    if (unique_id.empty()) {
+        // Auto-generate from PID + timestamp to ensure uniqueness across nodes
+        auto ts = std::chrono::system_clock::now().time_since_epoch().count();
+        unique_id = std::to_string(getpid()) + "-" + std::to_string(ts);
+    }
+    std::cout << "Client unique ID: " << unique_id << std::endl;
+
     // --- Initialize RDMA resources in main thread ---
     ConnectManager cm(FLAGS_rdma_server_address);
-    if (cm.wait_ready(1000000, 2) == IOCode::Timeout) {
+    if (cm.wait_ready(1000000, 20) == IOCode::Timeout) {
         RDMA_LOG(4) << "cm connect to server timeout";
         return -1;
     }
@@ -182,7 +193,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_threads; ++i) {
         nics[i] = RNic::create(RNicInfo::query_dev_names().at(FLAGS_use_nic_idx)).value();
         qps[i] = RC::create(nics[i], QPConfig()).value();
-        std::string qp_name = "-client2@1000" + std::to_string(i);
+        std::string qp_name = "-" + unique_id + "@" + std::to_string(i);
         auto qp_res = cm.cc_rc(qp_name, qps[i], FLAGS_reg_nic_name, QPConfig());
         RDMA_ASSERT(qp_res == IOCode::Ok) << std::get<0>(qp_res.desc);
         keys[i] = std::get<1>(qp_res.desc);
@@ -288,7 +299,7 @@ int main(int argc, char** argv) {
     outfile2.close();
     // --- Clean up RDMA resources ---
     for (int i = 0; i < num_threads; ++i) {
-        std::string qp_name = "-client2@1000" + std::to_string(i);
+        std::string qp_name = "-" + unique_id + "@" + std::to_string(i);
         auto del_res = cm.delete_remote_rc(qp_name, thread_params[i].key);
         RDMA_ASSERT(del_res == IOCode::Ok)
             << "Thread " << i << " delete remote QP error: " << del_res.desc;

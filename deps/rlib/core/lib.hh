@@ -135,7 +135,7 @@ public:
                             const Arc<::rdmaio::qp::RC> rc,
                             const ::rdmaio::nic_id_t &nic_id,
                             const ::rdmaio::qp::QPConfig &config,
-                            const double &timeout_usec = 1000000) {
+                            const double &timeout_usec = 10000000) {
 
     auto err_str = std::string("unknown error");
     u64 temp_key = 0;
@@ -203,7 +203,7 @@ public:
                                 const Arc<::rdmaio::qp::RC> rc,
                                 const ::rdmaio::nic_id_t &nic_id,
                                 const ::rdmaio::qp::QPConfig &config,
-                                const double &timeout_usec = 1000000) {
+                                const double &timeout_usec = 10000000) {
 
     auto err_str = std::string("unknown error");
     u64 temp_key = 0;
@@ -277,7 +277,7 @@ public:
    */
   using mr_res_t = std::pair<std::string, rmem::RegAttr>;
   Result<mr_res_t> fetch_remote_mr(const rmem::register_id_t &id,
-                                   const double &timeout_usec = 1000000) {
+                                   const double &timeout_usec = 10000000) {
     auto res = rpc.call(proto::FetchMr,
                         ::rdmaio::Marshal::dump<proto::MRReq>({.id = id}));
     auto res_reply = rpc.receive_reply(timeout_usec);
@@ -309,7 +309,7 @@ public:
    */
   using qp_attr_ret_t = std::pair<std::string, ::rdmaio::qp::QPAttr>;
   Result<qp_attr_ret_t> fetch_qp_attr(const std::string &name,
-                                      const double &timeout_usec = 1000000) {
+                                      const double &timeout_usec = 10000000) {
     auto err_str = std::string("unknown error");
     {
       // 1. first, sanity check the arg

@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "../common.hh"
@@ -255,6 +256,9 @@ class RecvChannel : public AbsChannel {
 
     if (valid()) {
       fcntl(this->sock_fd, F_SETFL, O_NONBLOCK);
+      // Increase UDP recv buffer to handle concurrent multi-node connections
+      int rcvbuf = 4 * 1024 * 1024; // 4MB
+      setsockopt(this->sock_fd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
     }
   }
 
@@ -263,6 +267,9 @@ class RecvChannel : public AbsChannel {
     if (valid()) {
       // set as a non-blocking channel
       fcntl(this->sock_fd, F_SETFL, O_NONBLOCK);
+      // Increase UDP recv buffer to handle concurrent multi-node connections
+      int rcvbuf = 4 * 1024 * 1024; // 4MB
+      setsockopt(this->sock_fd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
 
       // bind to this port
       sockaddr_in my_addr = {
