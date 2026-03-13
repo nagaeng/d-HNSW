@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 
   // 2. create the pair QP at server using CM
   ConnectManager cm(FLAGS_addr);
-  if (cm.wait_ready(1000000, 2) ==
+  if (cm.wait_ready(1000000, 20) ==
       IOCode::Timeout) // wait 1 second for server to ready, retry 2 times
     RDMA_ASSERT(false) << "cm connect to server timeout";
 

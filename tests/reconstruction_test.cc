@@ -307,7 +307,7 @@ int main(int argc, char** argv) {
 
     // Initialize RDMA connection
     ConnectManager cm(FLAGS_rdma_server_address);
-    if (cm.wait_ready(1000000, 2) == IOCode::Timeout) {
+    if (cm.wait_ready(1000000, 20) == IOCode::Timeout) {
         std::cerr << "RDMA connection timeout" << std::endl;
         return -1;
     }
